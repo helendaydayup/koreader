@@ -35,7 +35,6 @@ local Event = require("ui/event")
 local FileManager = require("apps/filemanager/filemanager")
 local Key = require("device/key")
 local Notification = require("ui/widget/notification")
-local ReaderDictionary = require("apps/reader/modules/readerdictionary")
 local ReaderFooter = require("apps/reader/modules/readerfooter")
 local ReaderHighlight = require("apps/reader/modules/readerhighlight")
 local ReaderTypography = require("apps/reader/modules/readertypography")
@@ -68,10 +67,6 @@ local settingsList = {
     book_metadata_archive = {category="none", event="ShowBookMetadataArchive", title=_("Book metadata archive"), general=true},
     bookmark_browser = {category="none", event="ShowBookmarkBrowser", title=_("Bookmark browser"), general=true, separator=true},
     ----
-    dictionary_lookup = {category="none", event="ShowDictionaryLookup", title=_("Dictionary lookup"), general=true},
-    load_dictionary_preset = {category="string", event="LoadDictionaryPreset", title=_("Load dictionary preset"), args_func=ReaderDictionary.getPresets, general=true},
-    cycle_dictionary_preset = {category="none", event="CycleDictionaryPresets", title=_("Cycle through dictionary presets"), general=true,},
-    wikipedia_lookup = {category="none", event="ShowWikipediaLookup", title=_("Wikipedia lookup"), general=true, separator=true},
     ----
     show_menu = {category="none", event="ShowMenu", title=_("Show menu"), general=true},
     menu_search = {category="none", event="MenuSearch", title=_("Menu search"), general=true},
@@ -329,11 +324,6 @@ local dispatcher_menu_order = {
     "collections_search",
     "book_metadata_archive",
     "bookmark_browser",
-    ----
-    "dictionary_lookup",
-    "load_dictionary_preset",
-    "cycle_dictionary_preset",
-    "wikipedia_lookup",
     ----
     "show_menu",
     "menu_search",

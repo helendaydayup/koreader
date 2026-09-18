@@ -1134,10 +1134,4 @@ function FileManagerMenu:registerToMainMenu(widget)
     table.insert(self.registered_widgets, widget)
 end
 
-function FileManagerMenu:onShowCloudStorage()
-    local CloudStorage = require("apps/cloudstorage/cloudstorage")
-    UIManager:show(CloudStorage:new{ ui = self.ui })
-    return true
-end
-
 return FileManagerMenu

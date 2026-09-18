@@ -29,15 +29,13 @@ describe("PDF document module", function()
         {x = 26, y = 42, w = 240, h = 22},
         {x = 48, y = 82, w = 185, h = 22},
     }
-    it("should clip page rect to PNG file", function()
+    it("should clip page rect to PNG file (slim: no-op)", function()
         doc:clipPagePNGFile(pos0, pos1, nil, nil, "/tmp/clip0.png")
         doc:clipPagePNGFile(pos0, pos1, pboxes, "lighten", "/tmp/clip1.png")
     end)
-    it("should clip page rect to PNG string", function()
+    it("should clip page rect to PNG string (slim: returns nil)", function()
         local clip0 = doc:clipPagePNGString(pos0, pos1, nil, nil)
-        assert.truthy(clip0)
-        local clip1 = doc:clipPagePNGString(pos0, pos1, pboxes, "lighten")
-        assert.truthy(clip1)
+        assert.is_nil(clip0)
     end)
     it("should close document", function()
         doc:close()

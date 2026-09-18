@@ -78,7 +78,7 @@ describe("Readerpaging module", function()
         setup(function()
             readerui = ReaderUI:new{
                 dimen = Screen:getSize(),
-                document = DocumentRegistry:openDocument("spec/front/unit/data/djvu3spec.djvu"),
+                document = DocumentRegistry:openDocument("spec/front/unit/data/sample.pdf"),
             }
             paging = readerui.paging
         end)

@@ -1,6 +1,5 @@
 local BD = require("ui/bidi")
 local ButtonDialog = require("ui/widget/buttondialog")
-local DictQuickLookup = require("ui/widget/dictquicklookup")
 local InfoMessage = require("ui/widget/infomessage")
 local InputDialog = require("ui/widget/inputdialog")
 local Menu = require("ui/widget/menu")
@@ -20,19 +19,17 @@ local FileManagerShortcuts = WidgetContainer:extend{
     settings = G_reader_settings:readSetting("folder_shortcuts_settings", {}),
 
     -- system shortcuts
-    providers_nb = 4, -- without plugins
+    providers_nb = 3, -- without plugins
     providers = {
         "home_dir",
         "download_dir",
         "screenshot_dir",
-        "wikipedia_save_dir",
         -- plugin shortcuts
     },
     provider_patterns = {
         ["%H%"] = "home_dir",
         ["%D%"] = "download_dir",
         ["%S%"] = "screenshot_dir",
-        ["%W%"] = "wikipedia_save_dir",
     },
     provider_props = {
         home_dir = {
@@ -60,18 +57,6 @@ local FileManagerShortcuts = WidgetContainer:extend{
             end,
             set = function(path)
                 G_reader_settings:saveSetting("screenshot_dir", path)
-            end,
-        },
-        wikipedia_save_dir = {
-            name = _("Wikipedia 'Save as EPUB' folder"),
-            get = function()
-                return G_reader_settings:readSetting("wikipedia_save_dir") or DictQuickLookup.getWikiSaveEpubDefaultDir()
-            end,
-            set = function(path)
-                G_reader_settings:saveSetting("wikipedia_save_dir", path)
-                if not util.pathExists(path) then
-                    lfs.mkdir(path)
-                end
             end,
         },
     },

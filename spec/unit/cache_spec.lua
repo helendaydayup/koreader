@@ -33,15 +33,15 @@ describe("Cache module", function()
         DocCache:clear()
     end)
 
-    it("should serialize koptcontext", function()
-        doc.configurable.text_wrap = 1
+    it("should serialize koptcontext (slim: koptcontext never created)", function()
+        -- Slim build: reflow removed, renderPage always goes through MuPDF,
+        -- so no koptcontext ends up in the cache; just exercise serialize.
         for pageno = 1, math.min(max_page, doc.info.number_of_pages) do
             doc:renderPage(pageno, nil, 1, 0, 1.0, 1.0)
-            doc:getPageDimensions(pageno)
+            doc:getPageDimensions(pageno, 1, 0)
             DocCache:serialize()
         end
         DocCache:clear()
-        doc.configurable.text_wrap = 0
     end)
 
     it("should deserialize koptcontext", function()

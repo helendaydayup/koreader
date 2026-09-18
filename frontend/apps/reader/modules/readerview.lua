@@ -1212,9 +1212,6 @@ function ReaderView:onSaveSettings()
             self.document:resetTileCacheValidity()
         end
         self.ui.doc_settings:saveSetting("tile_cache_validity_ts", self.document:getTileCacheValidity())
-        if self.document.is_djvu then
-            self.ui.doc_settings:saveSetting("render_mode", self.render_mode)
-        end
     end
     -- Don't etch the current rotation in stone when sticky rotation is enabled
     if G_reader_settings:nilOrFalse("lock_rotation") then
@@ -1224,34 +1221,6 @@ function ReaderView:onSaveSettings()
     self.ui.doc_settings:saveSetting("invert_ui_layout", self.invert_ui_layout)
     self.ui.doc_settings:saveSetting("show_overlap_enable", self.page_overlap_enable)
     self.ui.doc_settings:saveSetting("page_overlap_style", self.page_overlap_style)
-end
-
-function ReaderView:getRenderModeMenuTable()
-    local view = self
-    local function make_mode(text, mode)
-        return {
-            text = text,
-            checked_func = function() return view.render_mode == mode end,
-            callback = function()
-                view.render_mode = mode
-                view.document.render_mode = mode
-                view:recalculate()
-                UIManager:broadcastEvent(Event:new("RenderingModeUpdate"))
-            end,
-        }
-    end
-    return  {
-        -- @translators Selects which layers of the DjVu image should be rendered.  Valid  rendering  modes are color, black, mask, foreground, and background. See http://djvu.sourceforge.net/ and https://en.wikipedia.org/wiki/DjVu for more information about the format.
-        text = _("DjVu render mode"),
-        sub_item_table = {
-            make_mode(_("COLOUR (works for both colour and b&w pages)"), 0),
-            make_mode(_("BLACK & WHITE (for b&w pages only, much faster)"), 1),
-            make_mode(_("COLOUR ONLY (slightly faster than COLOUR)"), 2),
-            make_mode(_("MASK ONLY (for b&w pages only)"), 3),
-            make_mode(_("COLOUR BACKGROUND (show only background)"), 4),
-            make_mode(_("COLOUR FOREGROUND (show only foreground)"), 5),
-        }
-    }
 end
 
 function ReaderView:onCloseWidget()

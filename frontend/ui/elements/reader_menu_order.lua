@@ -63,7 +63,6 @@ local order = {
         "highlight_options",
         "selection_text", -- if Device:hasDPad()
         "panel_zoom_options",
-        "djvu_render_mode",
         "start_content_selection", -- if Device:hasDPad(), put this as last one so it is easy to select with "press" and "up" keys
     },
     setting = {
@@ -192,11 +191,8 @@ local order = {
     more_tools = {
         "auto_frontlight",
         "battery_statistics",
-        "book_shortcuts",
         "synchronize_time",
         "keep_alive",
-        "doc_setting_tweak",
-        "terminal",
         "----------------------------",
         "plugin_management",
         "patch_management",
@@ -204,23 +200,13 @@ local order = {
     search = {
         "search_settings",
         "----------------------------",
-        "dictionary_lookup",
-        "dictionary_lookup_history",
-        "vocabbuilder",
-        "----------------------------",
-        "wikipedia_lookup",
-        "wikipedia_history",
-        "----------------------------",
         "translate_current_page",
         "----------------------------",
-        "find_book_in_calibre_catalog",
         "fulltext_search",
         "fulltext_search_findall_results",
         "bookmark_search",
     },
     search_settings = {
-        "dictionary_settings",
-        "wikipedia_settings",
         "translation_settings",
         "----------------------------",
         "fulltext_search_settings",

@@ -191,16 +191,9 @@ function KoptInterface:getContextHash(doc, pageno, bbox, hash_list)
 end
 
 function KoptInterface:getPageBBox(doc, pageno)
-    if doc.configurable.text_wrap ~= 1 and doc.configurable.trim_page == 1 then
-        -- auto bbox finding
-        return self:getAutoBBox(doc, pageno)
-    elseif doc.configurable.text_wrap ~= 1 and doc.configurable.trim_page == 2 then
-        -- semi-auto bbox finding
-        return self:getSemiAutoBBox(doc, pageno)
-    else
-        -- get saved manual bbox
-        return Document.getPageBBox(doc, pageno)
-    end
+    -- Slim build: auto/semi-auto bbox detection (libk2pdfopt) removed,
+    -- always use the manual/native bbox.
+    return Document.getPageBBox(doc, pageno)
 end
 
 --[[--
@@ -369,11 +362,8 @@ end
 Get page dimensions.
 --]]
 function KoptInterface:getPageDimensions(doc, pageno, zoom, rotation)
-    if doc.configurable.text_wrap == 1 then
-        return self:getRFPageDimensions(doc, pageno, zoom, rotation)
-    else
-        return Document.getPageDimensions(doc, pageno, zoom, rotation)
-    end
+    -- Slim build: reflowed page dimensions (libk2pdfopt) removed.
+    return Document.getPageDimensions(doc, pageno, zoom, rotation)
 end
 
 --[[--
@@ -403,13 +393,9 @@ function KoptInterface:is_optimizing_page(doc)
 end
 
 function KoptInterface:renderPage(doc, pageno, rect, zoom, rotation, gamma, saturation, hinting)
-    if doc.configurable.text_wrap == 1 then
-        return self:renderReflowedPage(doc, pageno, rect, zoom, rotation, hinting)
-    elseif self:is_optimizing_page(doc) then
-        return self:renderOptimizedPage(doc, pageno, rect, zoom, rotation, hinting)
-    else
-        return Document.renderPage(doc, pageno, rect, zoom, rotation, gamma, saturation, hinting)
-    end
+    -- Slim build: reflow & page optimization (libk2pdfopt) removed,
+    -- always render through MuPDF.
+    return Document.renderPage(doc, pageno, rect, zoom, rotation, gamma, saturation, hinting)
 end
 
 --[[--
@@ -550,13 +536,9 @@ function KoptInterface:hintPage(doc, pageno, zoom, rotation, gamma, saturation)
     --- @note: Crappy safeguard around memory issues like in #7627: if we're eating too much RAM, drop half the cache...
     DocCache:memoryPressureCheck()
 
-    if doc.configurable.text_wrap == 1 then
-        self:hintReflowedPage(doc, pageno, zoom, rotation, true)
-    elseif self:is_optimizing_page(doc) then
-        self:renderOptimizedPage(doc, pageno, nil, zoom, rotation, true)
-    else
-        Document.hintPage(doc, pageno, zoom, rotation, gamma, saturation)
-    end
+    -- Slim build: reflow & optimization hinting (libk2pdfopt) removed,
+    -- always hint through MuPDF.
+    return Document.hintPage(doc, pageno, zoom, rotation, gamma, saturation)
 end
 
 --[[--
@@ -590,11 +572,9 @@ end
 
 function KoptInterface:drawPage(doc, target, x, y, rect, pageno, zoom, rotation, gamma, saturation)
     local nightmode_invert = doc.configurable.nightmode_document == 1 and Screen.night_mode
-    if doc.configurable.text_wrap == 1 then
-        self:drawContextPage(doc, target, x, y, rect, pageno, zoom, rotation, nightmode_invert)
-    elseif self:is_optimizing_page(doc) then
-        self:drawContextPage(doc, target, x, y, rect, pageno, zoom, rotation, nightmode_invert)
-    elseif nightmode_invert then
+    -- Slim build: reflow & optimization (libk2pdfopt) removed, always draw
+    -- the MuPDF-rendered page.
+    if nightmode_invert then
         Document.drawPageInverted(doc, target, x, y, rect, pageno, zoom, rotation, gamma, saturation)
     else
         Document.drawPage(doc, target, x, y, rect, pageno, zoom, rotation, gamma, saturation)
@@ -624,18 +604,10 @@ Extract text boxes in a MuPDF/Djvu page.
 Returned boxes are in native page coordinates zoomed at `1.0`.
 --]]
 function KoptInterface:getTextBoxes(doc, pageno)
-    local text = doc:getPageTextBoxes(pageno)
-    if text and #text > 1 and doc.configurable.forced_ocr ~= 1 then
-        return text
-    -- if we have no text in original page then we will reuse native word boxes
-    -- in reflow mode and find text boxes from scratch in non-reflow mode
-    else
-        if doc.configurable.text_wrap == 1 then
-            return self:getNativeTextBoxes(doc, pageno)
-        else
-            return self:getNativeTextBoxesFromScratch(doc, pageno)
-        end
-    end
+    -- Slim build: OCR-based word box extraction (libk2pdfopt/leptonica)
+    -- removed. Only the document's own text layer (MuPDF) is used; scanned
+    -- pages without a text layer simply have no selectable text.
+    return doc:getPageTextBoxes(pageno)
 end
 
 --[[--
@@ -793,46 +765,17 @@ end
 Get page regions in native page via optical method.
 --]]
 function KoptInterface:getPageBlock(doc, pageno, x, y)
-    local kctx
-    local bbox = doc:getPageBBox(pageno)
-    local hash_list = { "pageblocks" }
-    self:getContextHash(doc, pageno, bbox, hash_list)
-    local hash = table.concat(hash_list, "|")
-    local cached = DocCache:check(hash)
-    if not cached then
-        local page_size = Document.getNativePageDimensions(doc, pageno)
-        local full_page_bbox = {
-            x0 = 0, y0 = 0,
-            x1 = page_size.w,
-            y1 = page_size.h,
-        }
-        local kc = self:createContext(doc, pageno, full_page_bbox)
-        -- leptonica needs a source image of at least 300dpi
-        kc:setZoom(CanvasContext:getWidth() / page_size.w * 300 / CanvasContext:getDPI())
-        local page = doc._document:openPage(pageno)
-        page:getPagePix(kc, doc.render_mode, doc.configurable.background_cleanup)
-        kc:findPageBlocks()
-        DocCache:insert(hash, CacheItem:new{ kctx = kc, size = 3072 }) -- estimation
-        page:close()
-        kctx = kc
-    else
-        kctx = cached.kctx
-    end
-    return kctx:getPageBlock(x, y)
+    -- Slim build: page block detection (leptonica) removed.
+    -- Returns nil, callers fall back to plain zoom.
+    return nil
 end
 
 --[[--
 Get word from OCR providing selected word box.
 --]]
 function KoptInterface:getOCRWord(doc, pageno, wbox)
-    if not DocCache:check(self.ocrengine) then
-        DocCache:insert(self.ocrengine, OCREngine:new{ ocrengine = KOPTContext.new(), size = 3072 }) -- estimation
-    end
-    if doc.configurable.text_wrap == 1 then
-        return self:getReflewOCRWord(doc, pageno, wbox.sbox)
-    else
-        return self:getNativeOCRWord(doc, pageno, wbox.sbox)
-    end
+    -- Slim build: OCR (tesseract/leptonica) removed.
+    return nil
 end
 
 --[[--
@@ -947,29 +890,14 @@ function KoptInterface:getClipPageContext(doc, pos0, pos1, pboxes, drawer)
 end
 
 function KoptInterface:clipPagePNGFile(doc, pos0, pos1, pboxes, drawer, filename)
-    local kc = self:getClipPageContext(doc, pos0, pos1, pboxes, drawer)
-    kc:exportSrcPNGFile(pboxes, drawer, filename)
-    kc:free()
+    -- Slim build: page clipping to PNG (libk2pdfopt/leptonica) removed.
+    -- Callers (e.g., image translation) fall back to the text-only path.
 end
 
 function KoptInterface:clipPagePNGString(doc, pos0, pos1, pboxes, drawer)
-    local kc = self:getClipPageContext(doc, pos0, pos1, pboxes, drawer)
-    -- there is no fmemopen in Android so leptonica.pixWriteMemPng will
-    -- fail silently, workaround is creating a PNG file and read back the string
-    local png = nil
-    if FFIUtil.isAndroid() then
-        local tmp = "cache/tmpclippng.png"
-        kc:exportSrcPNGFile(pboxes, drawer, tmp)
-        local pngfile = io.open(tmp, "rb")
-        if pngfile then
-            png = pngfile:read("*all")
-            pngfile:close()
-        end
-    else
-        png = kc:exportSrcPNGString(pboxes, drawer)
-    end
-    kc:free()
-    return png
+    -- Slim build: page clipping to PNG (libk2pdfopt/leptonica) removed.
+    -- Callers (e.g., image translation) fall back to the text-only path.
+    return nil
 end
 
 --[[--
@@ -1160,11 +1088,8 @@ function KoptInterface:getWordFromPosition(doc, pos)
     local text_boxes = self:getTextBoxes(doc, pos.page)
     if text_boxes then
         self.last_text_boxes = text_boxes
-        if doc.configurable.text_wrap == 1 then
-            return self:getWordFromReflowPosition(doc, text_boxes, pos)
-        else
-            return self:getWordFromNativePosition(doc, text_boxes, pos)
-        end
+        -- Slim build: reflow (libk2pdfopt) removed, always use native position.
+        return self:getWordFromNativePosition(doc, text_boxes, pos)
     end
 end
 
@@ -1320,9 +1245,7 @@ function KoptInterface:getLinkFromPosition(doc, pageno, pos)
     end
     local page_links = doc:getPageLinks(pageno)
     if page_links then
-        if doc.configurable.text_wrap == 1 then
-            pos = self:reflowToNativePosTransform(doc, pageno, pos, {x=0.5, y=0.5})
-        end
+        -- Slim build: reflow (libk2pdfopt) removed, no position transform.
 
         local offset = CanvasContext:scaleBySize(5)
         local len = CanvasContext:scaleBySize(10)
@@ -1369,11 +1292,8 @@ Get text and text boxes from screen positions.
 function KoptInterface:getTextFromPositions(doc, pos0, pos1)
     local text_boxes = self:getTextBoxes(doc, pos0.page)
     if text_boxes then
-        if doc.configurable.text_wrap == 1 then
-            return self:getTextFromReflowPositions(doc, text_boxes, pos0, pos1)
-        else
-            return self:getTextFromNativePositions(doc, text_boxes, pos0, pos1)
-        end
+        -- Slim build: reflow (libk2pdfopt) removed, always use native positions.
+        return self:getTextFromNativePositions(doc, text_boxes, pos0, pos1)
     end
 end
 
@@ -1438,25 +1358,14 @@ Get text boxes from page positions.
 --]]
 function KoptInterface:getPageBoxesFromPositions(doc, pageno, ppos0, ppos1)
     if not ppos0 or not ppos1 then return end
-    if doc.configurable.text_wrap == 1 then
-        local spos0 = self:nativeToReflowPosTransform(doc, pageno, ppos0)
-        local spos1 = self:nativeToReflowPosTransform(doc, pageno, ppos1)
-        local page_boxes = self:getReflowedTextBoxes(doc, pageno)
-        if not page_boxes then
-            logger.warn("KoptInterface: missing page_boxes")
-            return
-        end
-        local text_boxes = self:getTextFromBoxes(page_boxes, spos0, spos1)
-        return text_boxes.boxes
-    else
-        local page_boxes = self:getTextBoxes(doc, pageno)
-        if not page_boxes then
-            logger.warn("KoptInterface: missing page_boxes")
-            return
-        end
-        local text_boxes = self:getTextFromBoxes(page_boxes, ppos0, ppos1)
-        return text_boxes.boxes
+    -- Slim build: reflow (libk2pdfopt) removed, always use native boxes.
+    local page_boxes = self:getTextBoxes(doc, pageno)
+    if not page_boxes then
+        logger.warn("KoptInterface: missing page_boxes")
+        return
     end
+    local text_boxes = self:getTextFromBoxes(page_boxes, ppos0, ppos1)
+    return text_boxes.boxes
 end
 
 --[[--
@@ -1483,21 +1392,8 @@ end
 Get page rect from native rect.
 --]]
 function KoptInterface:nativeToPageRectTransform(doc, pageno, rect)
-    if doc.configurable.text_wrap == 1 then
-        local pos0 = {
-            x = rect.x + 5, y = rect.y + 5
-        }
-        local pos1 = {
-            x = rect.x + rect.w - 5,
-            y = rect.y + rect.h - 5
-        }
-        local boxes = self:getPageBoxesFromPositions(doc, pageno, pos0, pos1)
-        if boxes then
-            return Geom.boundingBox(boxes)
-        end
-    else
-        return rect
-    end
+    -- Slim build: reflow (libk2pdfopt) removed, no transform needed.
+    return rect
 end
 
 local function get_pattern_list(pattern, case_insensitive)

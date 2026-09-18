@@ -280,12 +280,6 @@ Useful when used alongside 'Invert page turn taps and swipes'.]]),
     if Device:hasKeys() then
         self.menu_items.physical_buttons_setup = dofile("frontend/ui/elements/physical_buttons.lua")
     end
-    -- insert DjVu render mode submenu just before the last entry (show advanced)
-    -- this is a bit of a hack
-    if self.ui.document.is_djvu then
-        self.menu_items.djvu_render_mode = self.view:getRenderModeMenuTable()
-    end
-
     if Device:supportsScreensaver() then
         self.menu_items.screensaver = {
             text = _("Sleep screen"),
@@ -528,12 +522,6 @@ end
 
 function ReaderMenu:registerToMainMenu(widget)
     table.insert(self.registered_widgets, widget)
-end
-
-function ReaderMenu:onShowCloudStorage()
-    local CloudStorage = require("apps/cloudstorage/cloudstorage")
-    UIManager:show(CloudStorage:new{ ui = self.ui })
-    return true
 end
 
 return ReaderMenu

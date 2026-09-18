@@ -468,18 +468,7 @@ The first option ("auto") tries to automatically align reflowed text as it is in
                 name_text_hold_callback = optionsutil.showValues,
                 help_text = _([[In reflow mode, sets the spacing between words.]]),
             },
-            {
-                name = "text_wrap",
-                --- @translators Reflow text.
-                name_text = _("Reflow"),
-                toggle = {C_("Reflow", "off"), C_("Reflow", "on")},
-                values = {0, 1},
-                default_value = G_defaults:readSetting("DKOPTREADER_CONFIG_TEXT_WRAP"),
-                event = "ReflowUpdated",
-                name_text_hold_callback = optionsutil.showValues,
-                help_text = _([[Reflow mode extracts text and images from the original document, possibly discarding some formatting, and reflows it on the screen for easier reading.
-Some of the other settings are only available when reflow mode is enabled.]]),
-            },
+            -- Slim build: reflow (libk2pdfopt) removed, "Reflow" toggle dropped.
         }
     },
     {

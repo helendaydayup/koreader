@@ -139,28 +139,6 @@ function ReaderHighlight:init()
         end,
         -- then information lookup functions, putting on the left those that
         -- depend on an internet connection.
-        ["05_wikipedia"] = function(this)
-            return {
-                text = _("Wikipedia"),
-                callback = function()
-                    UIManager:scheduleIn(0.1, function()
-                        this:lookupWikipedia()
-                        -- We don't call this:onClose(), we need the highlight
-                        -- to still be there, as we may Highlight it from the
-                        -- dict lookup widget.
-                    end)
-                end,
-            }
-        end,
-        ["06_dictionary"] = function(this, index)
-            return {
-                text = _("Dictionary"),
-                callback = function()
-                    this:lookupDict(index)
-                    this:onClose(true) -- keep highlight for dictionary lookup
-                end,
-            }
-        end,
         ["07_translate"] = function(this, index)
             return {
                 text = _("Translate"),
@@ -368,8 +346,6 @@ local long_press_action = {
     {_("Select and highlight"), "select"},
     {_("Add note"), "note"},
     {_("Translate"), "translate"},
-    {_("Wikipedia"), "wikipedia"},
-    {_("Dictionary"), "dictionary"},
     {_("Fulltext search"), "search"},
 }
 -- we need to expose this table to readerkeyselection
@@ -1911,50 +1887,12 @@ function ReaderHighlight:onHoldPan(_, ges)
     UIManager:setDirty(self.dialog, "ui")
 end
 
-local info_message_ocr_text = _([[
-No OCR results or no language data.
-
-KOReader has a built-in OCR engine for recognizing words in scanned PDF and DjVu documents. In order to use OCR in scanned pages, you need to install tesseract trained data for your document language.
-
-You can download language data files for Tesseract version 5.3.4 from https://tesseract-ocr.github.io/tessdoc/Data-Files
-
-Copy the language data files (e.g., eng.traineddata for English and spa.traineddata for Spanish) into koreader/data/tessdata]])
-
 function ReaderHighlight:lookupDictWord()
-    -- convert sboxes to word boxes
-    local word_boxes = {}
-    for i, sbox in ipairs(self.selected_text.sboxes) do
-        word_boxes[i] = self.view:pageToScreenTransform(self.hold_pos.page, sbox)
-    end
-    -- if we extracted text directly
-    if #self.selected_text.text > 0 then
-        self.ui.dictionary:onLookupWord(self.selected_text.text, false, word_boxes, self, self.selected_link)
-    -- or we will do OCR
-    elseif self.selected_text.sboxes then
-        local text = self.ui.document:getOCRText(self.hold_pos.page, self.selected_text.sboxes)
-        if not text then
-            -- getOCRText is not implemented in some document backends, but
-            -- getOCRWord is implemented everywhere. As such, fall back to
-            -- getOCRWord.
-            text = ""
-            for _, sbox in ipairs(self.selected_text.sboxes) do
-                local word = self.ui.document:getOCRWord(self.hold_pos.page, { sbox = sbox })
-                logger.dbg("OCRed word:", word)
-                --- @fixme This might produce incorrect results on RTL text.
-                text = text .. (word or "")
-            end
-        end
-        logger.dbg("OCRed text:", text)
-        if text and text ~= "" then
-            self.ui.dictionary:onLookupWord(text, false, word_boxes, self, self.selected_link)
-        else
-            UIManager:show(InfoMessage:new{
-                text = info_message_ocr_text,
-            })
-            UIManager:scheduleIn(G_defaults:readSetting("DELAY_CLEAR_HIGHLIGHT_S"),function()
-                self:clear()
-            end)
-        end
+    -- Dictionary support removed in this slim build: just show the selection.
+    if self.selected_text and self.selected_text.text and #self.selected_text.text > 0 then
+        UIManager:show(InfoMessage:new{
+            text = util.cleanupSelectedText(self.selected_text.text),
+        })
     end
 end
 
@@ -2278,9 +2216,7 @@ function ReaderHighlight:writePdfAnnotation(action, item, content)
 end
 
 function ReaderHighlight:lookupWikipedia()
-    if self.selected_text then
-        self.ui:handleEvent(Event:new("LookupWikipedia", util.cleanupSelectedText(self.selected_text.text)))
-    end
+    -- Wikipedia support removed in this slim build.
 end
 
 function ReaderHighlight:onHighlightSearch()
@@ -2298,18 +2234,11 @@ function ReaderHighlight:onHighlightSearch()
 end
 
 function ReaderHighlight:lookupDict(index)
-    logger.dbg("dictionary lookup highlight")
-    self:highlightFromHoldPos()
+    -- Dictionary support removed in this slim build: show selected text instead.
     if self.selected_text then
-        local boxes = index and self:getHighlightVisibleBoxes(index) or (self.selected_text.sboxes or self.selected_text.pboxes)
-        local word_boxes
-        if boxes ~= nil then
-            word_boxes = {}
-            for i, box in ipairs(boxes) do
-                word_boxes[i] = self.view:pageToScreenTransform(self.selected_text.pos0.page, box)
-            end
-        end
-        self.ui.dictionary:onLookupWord(util.cleanupSelectedText(self.selected_text.text), false, word_boxes, self)
+        UIManager:show(InfoMessage:new{
+            text = util.cleanupSelectedText(self.selected_text.text),
+        })
     end
 end
 
