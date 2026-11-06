@@ -62,7 +62,6 @@ local order = {
         "----------------------------",
         "highlight_options",
         "selection_text", -- if Device:hasDPad()
-        "panel_zoom_options",
         "start_content_selection", -- if Device:hasDPad(), put this as last one so it is easy to select with "press" and "up" keys
     },
     setting = {
@@ -149,7 +148,6 @@ local order = {
         "----------------------------",
         "screen_dpi",
         "screen_eink_opt",
-        "autowarmth",
         "color_rendering",
         "----------------------------",
         "screen_timeout",
@@ -158,8 +156,6 @@ local order = {
         "screen_notification",
     },
     taps_and_gestures = {
-        "gesture_manager",
-        "gesture_overview",
         "gesture_intervals",
         "----------------------------",
         "ignore_hold_corners",
@@ -174,24 +170,11 @@ local order = {
     },
     tools = {
         "read_timer",
-        "calibre",
-        "exporter",
-        "statistics",
-        "progress_sync",
-        "cloudstorage",
-        "move_to_archive",
-        "wallabag",
-        "news_downloader",
-        "text_editor",
         "profiles",
-        "qrclipboard",
         "----------------------------",
         "more_tools",
     },
     more_tools = {
-        "auto_frontlight",
-        "battery_statistics",
-        "synchronize_time",
         "keep_alive",
         "----------------------------",
         "plugin_management",

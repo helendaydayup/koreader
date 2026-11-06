@@ -27,6 +27,12 @@ jobs:
           submodules: recursive
           persist-credentials: false
 
+      - name: Check slim configuration and menu regressions
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 spec/slim/configuration.lua
+
       - name: Pull official Kindle build environment
         run: docker pull "$BUILD_IMAGE"
 

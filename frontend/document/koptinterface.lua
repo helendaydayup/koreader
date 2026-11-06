@@ -80,15 +80,6 @@ function ContextCacheItem:load(filename)
     end
 end
 
-local OCREngine = CacheItem:new{}
-
-function OCREngine:onFree()
-    if self.ocrengine.freeOCR then
-        logger.dbg("free OCREngine", self.ocrengine)
-        self.ocrengine:freeOCR()
-    end
-end
-
 function KoptInterface:setDefaultConfigurable(configurable)
     configurable.doc_language = G_defaults:readSetting("DKOPTREADER_CONFIG_DOC_DEFAULT_LANG_CODE")
     configurable.trim_page = G_defaults:readSetting("DKOPTREADER_CONFIG_TRIM_PAGE")
@@ -107,6 +98,7 @@ function KoptInterface:setDefaultConfigurable(configurable)
     configurable.line_spacing = G_defaults:readSetting("DKOPTREADER_CONFIG_LINE_SPACING")
     configurable.word_spacing = G_defaults:readSetting("DKOPTREADER_CONFIG_DEFAULT_WORD_SPACING")
     configurable.background_cleanup = 0
+    configurable:normalizeSlimOptions("kopt_")
 end
 
 function KoptInterface:waitForContext(kc)
@@ -714,20 +706,8 @@ function KoptInterface:getReflowedTextBoxesFromScratch(doc, pageno)
 end
 
 function KoptInterface:getPanelFromPage(doc, pageno, ges)
-    local page_size = Document.getNativePageDimensions(doc, pageno)
-    local bbox = {
-        x0 = 0, y0 = 0,
-        x1 = page_size.w,
-        y1 = page_size.h,
-    }
-    local kc = self:createContext(doc, pageno, bbox)
-    kc:setZoom(1.0)
-    local page = doc._document:openPage(pageno)
-    page:getPagePix(kc, doc.render_mode, doc.configurable.background_cleanup)
-    local panel = kc:getPanelFromPage(ges)
-    page:close()
-    kc:free()
-    return panel
+    -- Panel detection depends on Leptonica, which is not shipped.
+    return nil
 end
 
 --[[--
@@ -855,10 +835,8 @@ end
 Get text from OCR providing selected text boxes.
 --]]
 function KoptInterface:getOCRText(doc, pageno, tboxes)
-    if not DocCache:check(self.ocrengine) then
-        DocCache:insert(self.ocrengine, OCREngine:new{ ocrengine = KOPTContext.new(), size = 3072 }) -- estimation
-    end
-    logger.info("Not implemented yet")
+    -- OCR is unavailable in the slim build.
+    return nil
 end
 
 function KoptInterface:getClipPageContext(doc, pos0, pos1, pboxes, drawer)

@@ -5,7 +5,6 @@ local Geom = require("ui/geometry")
 local InputContainer = require("ui/widget/container/inputcontainer")
 local Math = require("optmath")
 local UIManager = require("ui/uimanager")
-local bit = require("bit")
 local logger = require("logger")
 local util = require("util")
 local time = require("ui/time")
@@ -1215,8 +1214,8 @@ function ReaderPaging:onReflowUpdated()
 end
 
 function ReaderPaging:onToggleReflow()
-    self.view.document.configurable.text_wrap = bit.bxor(self.view.document.configurable.text_wrap, 1)
-    self:onReflowUpdated()
+    -- Ignore legacy shortcuts: this build has no reflow engine.
+    self.view.document.configurable.text_wrap = 0
 end
 
 return ReaderPaging

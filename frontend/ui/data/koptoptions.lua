@@ -100,27 +100,21 @@ local KoptOptions = {
                 name_text = _("Page Crop"),
                 -- manual=0, auto=1, semi-auto=2, none=3
                 -- ordered from least to max cropping done or possible
-                toggle = {C_("Page crop", "none"), C_("Page crop", "auto"), C_("Page crop", "semi-auto"), C_("Page crop", "manual")},
+                toggle = {C_("Page crop", "none"), C_("Page crop", "manual")},
                 alternate = false,
-                values = {3, 1, 2, 0},
-                default_value = G_defaults:readSetting("DKOPTREADER_CONFIG_TRIM_PAGE"),
+                values = {3, 0},
+                default_value = 3,
                 enabled_func = function()
                     return Device:isTouchDevice() or Device:hasDPad()
                 end,
                 event = "PageCrop",
-                args = {"none", "auto", "semi-auto", "manual"},
+                args = {"none", "manual"},
                 name_text_hold_callback = optionsutil.showValues,
-                help_text = _([[Allows cropping blank page margins in the original document.
-This might be needed on scanned documents, that may have speckles or fingerprints in the margins, to be able to use zoom to fit content width.
-- 'none' does not cut the original document margins.
-- 'auto' finds content area automatically.
-- 'semi-auto" finds content area automatically, inside some larger area defined manually.
-- 'manual" uses the area defined manually as-is.
-
-In 'semi-auto' and 'manual' modes, you may need to define areas once on an odd page number, and once on an even page number (these areas will then be used for all odd, or even, page numbers).]]),
+                help_text = _([[Crop page margins manually. Define an area on an odd page and an even page to use separate margins for each.]]),
             },
             {
                 name = "page_margin",
+                show = false, -- unavailable in the slim build
                 name_text = _("Margin"),
                 buttonprogress = true,
                 values = {0.05, 0.10, 0.25, 0.40, 0.55, 0.70, 0.85, 1.00},
@@ -138,6 +132,7 @@ In 'semi-auto' and 'manual' modes, you may need to define areas once on an odd p
             },
             {
                 name = "auto_straighten",
+                show = false, -- unavailable in the slim build
                 name_text = _("Auto Straighten"),
                 toggle = {_("0°"), _("5°"), _("10°"), _("15°"), _("25°")},
                 values = {0, 5, 10, 15, 25},
@@ -375,6 +370,7 @@ left to right or reverse, top to bottom or reverse.]]),
             },
             {
                 name = "line_spacing",
+                show = false, -- unavailable in the slim build
                 name_text = _("Line Spacing"),
                 toggle = {C_("Line spacing", "small"), C_("Line spacing", "medium"), C_("Line spacing", "large")},
                 values = {1.0, 1.2, 1.4},
@@ -389,6 +385,7 @@ left to right or reverse, top to bottom or reverse.]]),
             },
             {
                 name = "justification",
+                show = false, -- unavailable in the slim build
                 --- @translators Text alignment. Options given as icons: left, right, center, justify.
                 name_text = _("Alignment"),
                 item_icons = {
@@ -415,13 +412,9 @@ left to right or reverse, top to bottom or reverse.]]),
                 help_text = _([[In reflow mode, sets the text alignment.
 The first option ("auto") tries to automatically align reflowed text as it is in the original document.]]),
             },
-        }
-    },
-    {
-        icon = "appbar.textsize",
-        options = {
             {
                 name = "font_size",
+                show = false, -- unavailable in the slim build
                 item_text = tableOfNumbersToTableOfStrings(FONT_SCALE_FACTORS),
                 item_align_center = 1.0,
                 spacing = 15,
@@ -436,6 +429,7 @@ The first option ("auto") tries to automatically align reflowed text as it is in
             },
             {
                 name = "font_fine_tune",
+                show = false, -- unavailable in the slim build
                 name_text = _("Font Size"),
                 toggle = Device:isTouchDevice() and {C_("Font size", "decrease"), C_("Font size", "increase")} or nil,
                 item_text = not Device:isTouchDevice() and {C_("Font size", "decrease"), C_("Font size", "increase")} or nil,
@@ -458,6 +452,7 @@ The first option ("auto") tries to automatically align reflowed text as it is in
             },
             {
                 name = "word_spacing",
+                show = false, -- unavailable in the slim build
                 name_text = _("Word Gap"),
                 toggle = {C_("Word gap", "small"), C_("Word gap", "auto"), C_("Word gap", "large")},
                 values = G_defaults:readSetting("DKOPTREADER_CONFIG_WORD_SPACINGS"),
@@ -521,6 +516,7 @@ Lower values desaturate colors, 1.0 keeps original colors, and higher values inc
             },
             {
                 name = "white_threshold",
+                show = false, -- unavailable in the slim build
                 name_text = _("White Threshold"),
                 buttonprogress = true,
                 values = {255, 224, 192, 160, 128, 96, 64, 32},
@@ -539,6 +535,7 @@ Lower values desaturate colors, 1.0 keeps original colors, and higher values inc
             },
             {
                 name = "page_opt",
+                show = false, -- unavailable in the slim build
                 name_text = _("Dewatermark"),
                 toggle = {C_("Dewatermark", "off"), C_("Dewatermark", "on")},
                 values = {0, 1},
@@ -592,6 +589,7 @@ Useful for Internet Archive PDF documents.]]),
             },
             {
                 name = "quality",
+                show = false, -- unavailable in the slim build
                 name_text = C_("Quality", "Render Quality"),
                 toggle = {C_("Quality", "low"), C_("Quality", "default"), C_("Quality", "high")},
                 values={0.5, 1.0, 1.5},
@@ -610,6 +608,7 @@ Useful for Internet Archive PDF documents.]]),
         options = {
             {
                 name = "doc_language",
+                show = false, -- unavailable in the slim build
                 name_text = _("Document Language"),
                 enabled_func = function()
                     return #DKOPTREADER_CONFIG_DOC_LANGS_CODE > 0
@@ -624,6 +623,7 @@ Useful for Internet Archive PDF documents.]]),
             },
             {
                 name = "forced_ocr",
+                show = false, -- unavailable in the slim build
                 --- @translators If OCR is unclear, please see https://en.wikipedia.org/wiki/Optical_character_recognition
                 name_text = _("Forced OCR"),
                 toggle = {C_("Forced OCR", "off"), C_("Forced OCR", "on")},
@@ -635,6 +635,7 @@ Useful for Internet Archive PDF documents.]]),
             },
             {
                 name = "writing_direction",
+                show = false, -- unavailable in the slim build
                 name_text = _("Writing Direction"),
                 enabled_func = function(configurable)
                     return optionsutil.enableIfEquals(configurable, "text_wrap", 1)
@@ -654,13 +655,13 @@ Useful for Internet Archive PDF documents.]]),
             },
             {
                 name = "defect_size",
+                show = false, -- unavailable in the slim build
                 --- @translators The maximum size of a dust or ink speckle to be ignored instead of being considered a character.
                 name_text = _("Reflow Speckle Ignore Size"),
                 toggle = {C_("Reflow speckle ignore size", "small"), C_("Reflow speckle ignore size", "medium"), C_("Reflow speckle ignore size", "large")},
                 values = {1.0, 3.0, 5.0},
                 default_value = G_defaults:readSetting("DKOPTREADER_CONFIG_DEFECT_SIZE"),
                 event = "DefectSizeUpdate",
-                show = false, -- might work somehow, but larger values than 1.0 might easily eat content
                 enabled_func = function(configurable)
                     return optionsutil.enableIfEquals(configurable, "text_wrap", 1)
                 end,
@@ -668,11 +669,11 @@ Useful for Internet Archive PDF documents.]]),
             },
             {
                 name = "detect_indent",
+                show = false, -- unavailable in the slim build
                 name_text = _("Indentation"),
                 toggle = {C_("Indentation", "off"), C_("Indentation", "on")},
                 values = {0, 1},
                 default_value = G_defaults:readSetting("DKOPTREADER_CONFIG_DETECT_INDENT"),
-                show = false, -- does not work
                 enabled_func = function(configurable)
                     return optionsutil.enableIfEquals(configurable, "text_wrap", 1)
                 end,
@@ -690,6 +691,7 @@ Useful for Internet Archive PDF documents.]]),
             },
             {
                 name = "max_columns",
+                show = false, -- unavailable in the slim build
                 name_text = _("Document Columns"),
                 item_icons = {
                     "column.one",

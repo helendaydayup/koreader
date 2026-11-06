@@ -610,7 +610,7 @@ local Menu = FocusManager:extend{
     page_info = nil,
     page_return = nil,
 
-    items_per_page_default = 14,
+    items_per_page_default = 12,
     items_per_page = nil,
     items_font_size = nil,
     items_mandatory_font_size = nil,
@@ -632,7 +632,7 @@ local Menu = FocusManager:extend{
     -- it is usually set by the widget which creates the menu
     close_callback = nil,
     linesize = Size.line.medium,
-    line_color = Blitbuffer.COLOR_DARK_GRAY,
+    line_color = Blitbuffer.COLOR_LIGHT_GRAY,
 }
 
 function Menu:getItemShortCutIcon(dimen, key, style)

@@ -27,6 +27,18 @@ function Configurable:hash(list)
     end
 end
 
+function Configurable:normalizeSlimOptions(prefix)
+    if prefix ~= "kopt_" then return end
+    self.text_wrap = 0
+    self.white_threshold = 255
+    self.page_opt = 0
+    self.forced_ocr = 0
+    self.auto_straighten = 0
+    if self.trim_page == 1 or self.trim_page == 2 then
+        self.trim_page = 3
+    end
+end
+
 function Configurable:loadDefaults(config_options)
     -- reset configurable before loading new options
     self:reset()
@@ -40,6 +52,7 @@ function Configurable:loadDefaults(config_options)
             self[key] = default or options[j].default_value
         end
     end
+    self:normalizeSlimOptions(prefix)
 end
 
 function Configurable:loadSettings(settings, prefix)
@@ -53,6 +66,7 @@ function Configurable:loadSettings(settings, prefix)
             end
         end
     end
+    self:normalizeSlimOptions(prefix)
 end
 
 function Configurable:saveSettings(settings, prefix)

@@ -32,7 +32,7 @@ local Size = {
     border = {
         default = Screen:scaleBySize(1),
         thin = Screen:scaleBySize(0.5),
-        button = Screen:scaleBySize(1.5),
+        button = Screen:scaleBySize(1),
         window = Screen:scaleBySize(1.5),
         thick = Screen:scaleBySize(2),
         inputtext = Screen:scaleBySize(2),
@@ -51,7 +51,7 @@ local Size = {
         tiny = Screen:scaleBySize(1),
         small = Screen:scaleBySize(2),
         large = Screen:scaleBySize(10),
-        button = Screen:scaleBySize(2),
+        button = Screen:scaleBySize(4),
         buttontable = Screen:scaleBySize(4),
         fullscreen = Screen:scaleBySize(15),
     },

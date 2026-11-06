@@ -29,6 +29,7 @@ local ReadCollection = require("readcollection")
 local ReaderDeviceStatus = require("apps/reader/modules/readerdevicestatus")
 local ReadHistory = require("readhistory")
 local Screenshoter = require("ui/widget/screenshoter")
+local Size = require("ui/size")
 local TitleBar = require("ui/widget/titlebar")
 local UIManager = require("ui/uimanager")
 local ffiUtil = require("ffi/util")
@@ -115,20 +116,23 @@ function FileManager:setupLayout()
     self.show_parent = self.show_parent or self
     self.title_bar = TitleBar:new{
         show_parent = self.show_parent,
-        fullscreen = "true",
-        align = "center",
+        fullscreen = true,
+        align = "left",
+        with_bottom_line = true,
+        bottom_line_color = Blitbuffer.COLOR_LIGHT_GRAY,
+        bottom_line_h_padding = Size.padding.fullscreen,
         title = self.title,
         title_top_padding = Screen:scaleBySize(6),
         subtitle = "",
         subtitle_truncate_left = true,
         subtitle_fullwidth = true,
-        button_padding = Screen:scaleBySize(5),
-        left_icon = "home",
-        left_icon_size_ratio = 1,
+        button_padding = Screen:scaleBySize(9),
+        left_icon = "slim.home",
+        left_icon_size_ratio = 0.75,
         left_icon_tap_callback = function() self:onHome() end,
         left_icon_hold_callback = function() self:onShowFolderMenu() end,
-        right_icon = self.selected_files and "check" or "plus",
-        right_icon_size_ratio = 1,
+        right_icon = self.selected_files and "slim.check" or "slim.plus",
+        right_icon_size_ratio = 0.75,
         right_icon_tap_callback = function() self:onShowPlusMenu() end,
         right_icon_hold_callback = false, -- propagate long-press to dispatcher
     }
@@ -511,7 +515,7 @@ function FileManager:onToggleSelectMode(do_refresh)
     logger.dbg("toggle select mode")
     if self.selected_files then
         self.selected_files = nil
-        self.title_bar:setRightIcon("plus")
+        self.title_bar:setRightIcon("slim.plus")
         if do_refresh then
             self.file_chooser:refreshPath()
         else
@@ -519,7 +523,7 @@ function FileManager:onToggleSelectMode(do_refresh)
         end
     else
         self.selected_files = {}
-        self.title_bar:setRightIcon("check")
+        self.title_bar:setRightIcon("slim.check")
     end
     return true
 end

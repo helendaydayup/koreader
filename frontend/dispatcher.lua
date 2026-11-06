@@ -242,11 +242,9 @@ local settingsList = {
     -- Fixed layout documents
     toggle_page_flipping = {category="none", event="TogglePageFlipping", title=_("Toggle page flipping"), paging=true},
     toggle_bookmark_flipping = {category="none", event="ToggleBookmarkFlipping", title=_("Toggle bookmark flipping"), paging=true},
-    toggle_reflow = {category="none", event="ToggleReflow", title=_("Toggle reflow"), paging=true},
     zoom = {category="string", event="SetZoomMode", title=_("Zoom mode"), args_func=ReaderZooming.getZoomModeActions, paging=true},
     zoom_factor_change = {category="none", event="ZoomFactorChange", title=_("Change zoom factor"), paging=true, separator=true},
     ----
-    panel_zoom_toggle = {category="none", event="TogglePanelZoomSetting", title=_("Toggle panel zoom"), paging=true, separator=true},
     ----
 
     -- parsed from CreOptions
@@ -279,7 +277,6 @@ local settingsList = {
 
     -- parsed from KoptOptions
     kopt_trim_page = {category="string", paging=true},
-    kopt_page_margin = {category="string", paging=true},
     kopt_zoom_overlap_h = {category="absolutenumber", paging=true},
     kopt_zoom_overlap_v = {category="absolutenumber", paging=true},
     kopt_zoom_mode_type = {category="string", paging=true},
@@ -289,24 +286,10 @@ local settingsList = {
     kopt_zoom_direction = {category="string", paging=true},
     kopt_page_scroll = {category="string", paging=true},
     kopt_page_gap_height = {category="string", paging=true},
-    kopt_line_spacing = {category="configurable", paging=true},
-    kopt_justification = {category="configurable", paging=true},
-    kopt_font_size = {category="string", paging=true, title=_("Font Size")},
-    kopt_font_fine_tune = {category="string", paging=true, title=_("Change font size")},
-    kopt_word_spacing = {category="configurable", paging=true},
-    kopt_text_wrap = {category="string", paging=true},
     kopt_contrast = {category="string", paging=true},
-    kopt_page_opt = {category="configurable", paging=true},
     kopt_hw_dithering = {category="string", paging=true},
     kopt_sw_dithering = {category="string", paging=true},
-    kopt_quality = {category="configurable", paging=true},
-    kopt_doc_language = {category="string", paging=true},
-    kopt_forced_ocr = {category="configurable", paging=true},
-    kopt_writing_direction = {category="configurable", paging=true},
-    kopt_defect_size = {category="string", paging=true}, -- not shown in the bottom menu
     kopt_nightmode_document = {category="configurable", paging=true},
-    kopt_max_columns = {category="configurable", paging=true},
-    kopt_auto_straighten = {category="absolutenumber", paging=true},
 
     settings = nil, -- reserved for per instance dispatcher settings
 }
@@ -527,14 +510,11 @@ local dispatcher_menu_order = {
     -- Fixed layout documents
     "toggle_page_flipping",
     "toggle_bookmark_flipping",
-    "toggle_reflow",
     "zoom",
     "zoom_factor_change",
     ----
-    "panel_zoom_toggle",
     ----
     "kopt_trim_page",
-    "kopt_page_margin",
     "kopt_zoom_overlap_h",
     "kopt_zoom_overlap_v",
     "kopt_zoom_mode_type",
@@ -544,24 +524,10 @@ local dispatcher_menu_order = {
     "kopt_zoom_direction",
     "kopt_page_scroll",
     "kopt_page_gap_height",
-    "kopt_line_spacing",
-    "kopt_justification",
-    "kopt_font_size",
-    "kopt_font_fine_tune",
-    "kopt_word_spacing",
-    "kopt_text_wrap",
     "kopt_contrast",
-    "kopt_page_opt",
     "kopt_hw_dithering",
     "kopt_sw_dithering",
-    "kopt_quality",
-    "kopt_doc_language",
-    "kopt_forced_ocr",
-    "kopt_writing_direction",
-    "kopt_defect_size",
     "kopt_nightmode_document",
-    "kopt_max_columns",
-    "kopt_auto_straighten",
 }
 
 --[[--

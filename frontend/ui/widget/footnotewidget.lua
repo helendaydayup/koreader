@@ -3,7 +3,6 @@ local Blitbuffer = require("ffi/blitbuffer")
 local BottomContainer = require("ui/widget/container/bottomcontainer")
 local CenterContainer = require("ui/widget/container/centercontainer")
 local Device = require("device")
-local Event = require("ui/event")
 local FrameContainer = require("ui/widget/container/framecontainer")
 local Geom = require("ui/geometry")
 local GestureRange = require("ui/gesturerange")
@@ -19,7 +18,6 @@ local VerticalSpan = require("ui/widget/verticalspan")
 local _ = require("gettext")
 local Screen = Device.screen
 local T = require("ffi/util").template
-local time = require("ui/time")
 
 -- Note: we can't use < or > in comments in the CSS, or MuPDF complains with:
 --   error: css syntax error: unterminated comment.
@@ -187,17 +185,9 @@ function FootnoteWidget:init()
                     range = range,
                 },
                 -- callback function when HoldReleaseText is handled as args
-                args = function(text, hold_duration)
-                    if self.dialog then
-                        local dict_close_callback = function()
-                            self.htmlwidget.htmlbox_widget:scheduleClearHighlightAndRedraw()
-                        end
-
-                        local lookup_target = hold_duration < time.s(3) and "LookupWord" or "LookupWikipedia"
-                        self.dialog:handleEvent(
-                            Event:new(lookup_target, text, nil, nil, nil, nil, dict_close_callback)
-                        )
-                    end
+                args = function()
+                    -- Lookup providers are not included in the slim build.
+                    self.htmlwidget.htmlbox_widget:scheduleClearHighlightAndRedraw()
                 end
             },
         }

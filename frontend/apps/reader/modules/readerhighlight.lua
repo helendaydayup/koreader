@@ -707,19 +707,12 @@ If you wish your highlights to be saved in the document, just move it to a writa
         })
     end
 
-    if self.ui.paging then
-        menu_items.panel_zoom_options = {
-            text = _("Panel zoom (manga/comic)"),
-            sub_item_table = self:genPanelZoomMenu(),
-        }
-    end
-
     -- main menu Settings
     menu_items.long_press = {
         text = _("Long-press on text"),
         sub_item_table = {
             {
-                text = _("Dictionary on single word selection"),
+                text = _("Show menu on single word selection"),
                 checked_func = function()
                     return not self.view.highlight.disabled and G_reader_settings:nilOrFalse("highlight_action_on_single_word")
                 end,
@@ -1580,7 +1573,7 @@ end
 
 function ReaderHighlight:onTogglePanelZoomSetting(arg, ges)
     if self.ui.rolling then return end
-    self.panel_zoom_enabled = not self.panel_zoom_enabled
+    self.panel_zoom_enabled = false
 end
 
 function ReaderHighlight:onToggleFallbackTextSelection(arg, ges)
@@ -1923,20 +1916,11 @@ function ReaderHighlight:translate(index)
     end
     if #self.selected_text.text > 0 then
         self:onTranslateText(self.selected_text.text, index)
-    -- or we will do OCR
-    elseif self.hold_pos then
-        local text = self.ui.document:getOCRText(self.hold_pos.page, self.selected_text)
-        logger.dbg("OCRed text:", text)
-        if text and text ~= "" then
-            self:onTranslateText(text)
-        else
-            UIManager:show(InfoMessage:new{
-                text = info_message_ocr_text,
-            })
-            UIManager:scheduleIn(G_defaults:readSetting("DELAY_CLEAR_HIGHLIGHT_S"),function()
-                self:clear()
-            end)
-        end
+    else
+        UIManager:show(InfoMessage:new{
+            text = _("No text selected."),
+        })
+        self:clear()
     end
 end
 
@@ -1985,6 +1969,9 @@ function ReaderHighlight:onHoldRelease()
     self:_resetHoldTimer(true) -- clear state
 
     local default_highlight_action = G_reader_settings:readSetting("default_highlight_action", "ask")
+    if default_highlight_action == "dictionary" or default_highlight_action == "wikipedia" then
+        default_highlight_action = "ask"
+    end
 
     if self.select_mode then -- extended highlighting, ending fragment
         if self.selected_text then
@@ -2010,7 +1997,7 @@ function ReaderHighlight:onHoldRelease()
 
     if self.selected_text then
         if self.is_word_selection then
-            self:lookupDictWord()
+            self:onShowHighlightMenu()
         else
             if long_final_hold or default_highlight_action == "ask" then
                 -- bypass default action and show popup if long final hold
@@ -2025,12 +2012,6 @@ function ReaderHighlight:onHoldRelease()
                 self:onClose()
             elseif default_highlight_action == "translate" then
                 self:translate()
-            elseif default_highlight_action == "wikipedia" then
-                self:lookupWikipedia()
-                self:onClose()
-            elseif default_highlight_action == "dictionary" then
-                self:lookupDict()
-                self:onClose(true) -- keep selected text
             elseif default_highlight_action == "search" then
                 self:onHighlightSearch()
                 -- No self:onClose() to not remove the selected text
@@ -2668,19 +2649,8 @@ function ReaderHighlight:onReadSettings(config)
                 self.highlight_write_into_pdf = G_reader_settings:readSetting("highlight_write_into_pdf") -- true or nil
             end
         end
-        local ext = util.getFileNameSuffix(self.ui.document.file)
-        G_reader_settings:initializeExtSettings("panel_zoom_enabled", {cbz = true, cbt = true})
-        G_reader_settings:initializeExtSettings("panel_zoom_fallback_to_text_selection", {pdf = true})
-        if config:has("panel_zoom_enabled") then
-            self.panel_zoom_enabled = config:isTrue("panel_zoom_enabled")
-        else
-            self.panel_zoom_enabled = G_reader_settings:getSettingForExt("panel_zoom_enabled", ext) or false
-        end
-        if config:has("panel_zoom_fallback_to_text_selection") then
-            self.panel_zoom_fallback_to_text_selection = config:isTrue("panel_zoom_fallback_to_text_selection")
-        else
-            self.panel_zoom_fallback_to_text_selection = G_reader_settings:getSettingForExt("panel_zoom_fallback_to_text_selection", ext) or false
-        end
+        self.panel_zoom_enabled = false
+        self.panel_zoom_fallback_to_text_selection = true
     end
 end
 

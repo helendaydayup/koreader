@@ -1,7 +1,6 @@
 local BD = require("ui/bidi")
 local Blitbuffer = require("ffi/blitbuffer")
 local Device = require("device")
-local DoubleSpinWidget = require("ui/widget/doublespinwidget")
 local Geom = require("ui/geometry")
 local InputContainer = require("ui/widget/container/inputcontainer")
 local ReaderHighlight = require("apps/reader/modules/readerhighlight")
@@ -223,40 +222,22 @@ function ReaderKeySelection:addToMainMenu(menu_items)
     -- We allow the user to select the rate at which the content selection tool moves
     -- through the screen. Keep local refs so isTouchDevice() can reuse them below.
     local crosshairs_speed_item = {
-        text_func = function()
-            local reader_speed = G_reader_settings:readSetting("highlight_non_touch_factor") or 4
-            local dict_speed = G_reader_settings:readSetting("highlight_non_touch_factor_dict") or 3
-            return T(_("Crosshairs speed (reader/dict): %1 / %2"), reader_speed, dict_speed)
-        end,
+        text = _("Crosshairs speed"),
         callback = function(touchmenu_instance)
-            local reader_speed = G_reader_settings:readSetting("highlight_non_touch_factor") or 4
-            local dict_speed = G_reader_settings:readSetting("highlight_non_touch_factor_dict") or 3
-            local double_spin_widget = DoubleSpinWidget:new{
-                left_text = _("Reader") .. " PDF/DjVu",
-                left_value = reader_speed,
-                left_min = 0.25,
-                left_max = 5,
-                left_default = 4,
-                left_precision = "%.2f",
-                left_step = 0.25,
-                left_hold_step = 0.05,
-                right_text = _("Dictionary"),
-                right_value = dict_speed,
-                right_min = 0.25,
-                right_max = 5,
-                right_default = 3,
-                right_precision = "%.2f",
-                right_step = 0.25,
-                right_hold_step = 0.05,
+            UIManager:show(SpinWidget:new{
+                value = G_reader_settings:readSetting("highlight_non_touch_factor") or 4,
+                value_min = 0.25,
+                value_max = 5,
+                default_value = 4,
+                precision = "%.2f",
+                value_step = 0.25,
+                value_hold_step = 0.05,
                 title_text = _("Crosshairs speed"),
-                info_text = _("Select a decimal value from 0.25 to 5. A smaller value increases the travel distance of the crosshairs per keystroke. Font size and this value are inversely correlated, meaning a smaller font size requires a larger value and vice versa."),
-                callback = function(left_value, right_value)
-                    G_reader_settings:saveSetting("highlight_non_touch_factor", left_value)
-                    G_reader_settings:saveSetting("highlight_non_touch_factor_dict", right_value)
+                callback = function(spin)
+                    G_reader_settings:saveSetting("highlight_non_touch_factor", spin.value)
                     if touchmenu_instance then touchmenu_instance:updateItems() end
-                end
-            }
-            UIManager:show(double_spin_widget)
+                end,
+            })
         end,
     }
     table.insert(menu_items.long_press.sub_item_table, crosshairs_speed_item)
@@ -326,7 +307,7 @@ function ReaderKeySelection:addToMainMenu(menu_items)
         menu_items.selection_text = {
             text = text_label,
             sub_item_table = {
-                menu_items.long_press.sub_item_table[1], -- Dictionary on single word selection
+                menu_items.long_press.sub_item_table[1], -- Menu on single word selection
                 {
                     text_func = function()
                         local multi_word = G_reader_settings:readSetting("default_highlight_action")

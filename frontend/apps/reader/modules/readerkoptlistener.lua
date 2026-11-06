@@ -2,7 +2,6 @@ local EventListener = require("ui/widget/eventlistener")
 local Event = require("ui/event")
 local ReaderZooming = require("apps/reader/modules/readerzooming")
 local UIManager = require("ui/uimanager")
-local OCRUtil = require("ui/data/ocr")
 
 local ReaderKoptListener = EventListener:extend{}
 
@@ -31,23 +30,7 @@ function ReaderKoptListener:onReadSettings(config)
     end
     self.ui:handleEvent(Event:new("DitheringUpdate"))
 
-    -- Auto-select OCR language if only one is available, or if the configured/default language is missing.
-    local available = OCRUtil.getOCRLangs()
-    if #available > 0 then
-        local current = self.document.configurable.doc_language
-        local function has_lang(code)
-            for _, v in ipairs(available) do if v == code then return true end end
-            return false
-        end
-        if #available == 1 and current ~= available[1] then
-            self.document.configurable.doc_language = available[1]
-            self.ui:handleEvent(Event:new("DocLangUpdate", available[1]))
-        elseif current and not has_lang(current) then
-            -- Default/configured language not installed anymore: pick first available
-            self.document.configurable.doc_language = available[1]
-            self.ui:handleEvent(Event:new("DocLangUpdate", available[1]))
-        end
-    end
+
 end
 
 function ReaderKoptListener:onSaveSettings()
@@ -93,6 +76,7 @@ function ReaderKoptListener:onConfigChange(option_name, option_value)
     -- but fortunately they can be distinguished by their different ranges
     if (option_name == "font_size" or option_name == "line_spacing") and option_value > 5 then return end
     self.document.configurable[option_name] = option_value
+    self.document.configurable:normalizeSlimOptions("kopt_")
     self.ui:handleEvent(Event:new("StartActivityIndicator"))
     UIManager:setDirty("all", "partial")
     return true
