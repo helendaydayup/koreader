@@ -1,0 +1,70 @@
+name: Kindle slim build
+
+on:
+  push:
+    branches: [07-1]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kindle-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  kindlepw2:
+    name: Kindle 7th generation (firmware below 5.16.3)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      BUILD_IMAGE: koreader/kokindle:6.0.0-22.04
+    steps:
+      - name: Checkout source and pinned submodules
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Pull official Kindle build environment
+        run: docker pull "$BUILD_IMAGE"
+
+      - name: Build Kindle ZIP
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp -e CI=true -e PARALLEL_JOBS=2 \
+            -v "$GITHUB_WORKSPACE:/work" -w /work \
+            "$BUILD_IMAGE" bash -euo pipefail -c '
+              export PATH="/opt/x-tools/bin:$PATH"
+              arm-kindlepw2-linux-gnueabi-gcc --version
+              bash ./kodev release --ignore-translation kindlepw2 zip
+            '
+
+      - name: Verify package and create checksum
+        run: |
+          shopt -s nullglob
+          packages=(koreader-kindlepw2-*.zip)
+          test "${#packages[@]}" -eq 1
+          unzip -t "${packages[0]}"
+          unzip -Z1 "${packages[0]}" > /tmp/kindle-package-files.txt
+          grep -Fx 'koreader/reader.lua' /tmp/kindle-package-files.txt
+          grep -Fx 'koreader/luajit' /tmp/kindle-package-files.txt
+          grep -q '^extensions/koreader/' /tmp/kindle-package-files.txt
+          sha256sum "${packages[0]}" > "${packages[0]}.sha256"
+          {
+            echo '### Kindle slim package'
+            echo 'Target: kindlepw2 — firmware below 5.16.3.'
+            echo "Source commit: $GITHUB_SHA"
+            echo 'Download the ZIP and checksum from this run’s artifacts.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Kindle installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: koreader-kindlepw2-slim-${{ github.sha }}
+          path: |
+            koreader-kindlepw2-*.zip
+            koreader-kindlepw2-*.zip.sha256
+          if-no-files-found: error
+          retention-days: 30
