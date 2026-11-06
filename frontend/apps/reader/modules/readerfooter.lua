@@ -508,8 +508,8 @@ ReaderFooter.default_settings = {
     battery = Device:hasBattery(),
     battery_hide_threshold = Device:hasAuxBattery() and 200 or 100,
     percentage = true,
-    book_time_to_read = true,
-    chapter_time_to_read = true,
+    book_time_to_read = false,
+    chapter_time_to_read = false,
     frontlight = false,
     mem_usage = false,
     wifi_status = false,
@@ -551,6 +551,9 @@ ReaderFooter.default_settings = {
 
 function ReaderFooter:init()
     self.settings = G_reader_settings:readSetting("footer", self.default_settings)
+    -- Reading-time estimates require the removed statistics plugin.
+    self.settings.book_time_to_read = false
+    self.settings.chapter_time_to_read = false
 
     self.additional_footer_content = {} -- array, where additional header content can be inserted.
 
@@ -1456,8 +1459,6 @@ function ReaderFooter:addToMainMenu(menu_items)
     end
     table.insert(footer_items, getMinibarOption("bookmark_count"))
     table.insert(footer_items, getMinibarOption("percentage"))
-    table.insert(footer_items, getMinibarOption("book_time_to_read"))
-    table.insert(footer_items, getMinibarOption("chapter_time_to_read"))
     if MODE.frontlight then
         table.insert(footer_items, getMinibarOption("frontlight"))
     end

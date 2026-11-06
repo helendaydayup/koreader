@@ -12,10 +12,6 @@ local function hasLastFile()
     return last_file and lfs.attributes(last_file, "mode") == "file"
 end
 
-local function isReaderProgressEnabled()
-    return ui.statistics ~= nil
-end
-
 local function allowRandomImageFolder()
     local may_ignore_book_cover = G_reader_settings:isTrue("screensaver_exclude_on_hold_books")
         or G_reader_settings:isTrue("screensaver_exclude_finished_books")
@@ -50,7 +46,6 @@ local sub_item_table = {
             genMenuItem(_("Show book cover on sleep screen"), "screensaver_type", "cover", hasLastFile),
             genMenuItem(_("Show custom image or cover on sleep screen"), "screensaver_type", "document_cover"),
             genMenuItem(_("Show random image from folder on sleep screen"), "screensaver_type", "random_image"),
-            genMenuItem(_("Show reading progress on sleep screen"), "screensaver_type", "readingprogress", isReaderProgressEnabled),
             genMenuItem(_("Show book status on sleep screen"), "screensaver_type", "bookstatus", hasLastFile),
             genMenuItem(_("Leave screen as-is"), "screensaver_type", "disable", nil, true),
             -- separator
